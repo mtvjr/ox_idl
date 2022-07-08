@@ -30,10 +30,8 @@ impl Literal {
     pub fn hex_int_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         just("0x")
             .or(just("0X"))
-            .then(text::int(16))
-            .map(|(_p, d): (&str, String)| {
-                Literal::Integer(u64::from_str_radix(d.as_str(), 16).unwrap())
-            })
+            .ignore_then(text::int(16))
+            .map(|d: String| Literal::Integer(u64::from_str_radix(d.as_str(), 16).unwrap()))
     }
 
     pub fn oct_int_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
@@ -55,7 +53,7 @@ impl Literal {
 }
 
 #[cfg(test)]
-mod tests {
+mod literal_tests {
     use chumsky::Parser;
 
     #[test]
