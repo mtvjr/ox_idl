@@ -68,8 +68,17 @@ impl Literal {
             .or(Self::dec_int_parser())
     }
 
+    pub fn char_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
+        // TODO: Support escape sequences
+        filter::<_, _, Simple<char>>(|c: &char| c.is_ascii())
+            .delimited_by(just("'"), just("'"))
+            .map(|c: char| Self::Character(c))
+    }
+
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
-        Self::bool_parser().or(Self::int_parser())
+        Self::bool_parser()
+            .or(Self::int_parser())
+            .or(Self::char_parser())
     }
 }
 
@@ -188,6 +197,22 @@ mod literal_tests {
         assert_eq!(
             crate::Literal::oct_int_parser().parse("0527"),
             Ok(crate::Literal::Integer(343))
+        );
+    }
+
+    #[test]
+    fn parse_char() {
+        assert_eq!(
+            crate::Literal::char_parser().parse("'3'"),
+            Ok(crate::Literal::Character('3'))
+        );
+        assert_eq!(
+            crate::Literal::char_parser().parse("'A'"),
+            Ok(crate::Literal::Character('A'))
+        );
+        assert_eq!(
+            crate::Literal::char_parser().parse("'a'"),
+            Ok(crate::Literal::Character('a'))
         );
     }
 }
