@@ -24,7 +24,7 @@ use chumsky::prelude::*;
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     Bool(bool),
-    Characer(char),
+    Character(char),
     FixedPoint(u64, u64),
     FloatingPoint(f64),
     Integer(u64),
