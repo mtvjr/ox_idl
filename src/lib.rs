@@ -71,13 +71,13 @@ impl Literal {
     pub fn float_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // TODO: Support e notation
         let digits = text::digits(10);
-        let dot_part = just('.').repeated().at_most(1);
+        let dot = just('.');
 
         let decimal_only = digits
-            .then_ignore(dot_part)
+            .then_ignore(dot)
             .map(|d| Self::FloatingPoint(d.parse().unwrap()));
 
-        let fractional_only = dot_part
+        let fractional_only = dot
             .ignore_then(digits)
             .map(|f| Self::FloatingPoint(('.'.to_string() + f.as_str()).parse().unwrap()));
 
@@ -252,7 +252,7 @@ mod literal_tests {
             Ok(crate::Literal::FloatingPoint(19234.12534))
         );
         assert_eq!(
-            crate::Literal::float_parser().parse("0"),
+            crate::Literal::float_parser().parse("0."),
             Ok(crate::Literal::FloatingPoint(0.0))
         );
         assert_eq!(
@@ -300,5 +300,20 @@ mod literal_tests {
             crate::Literal::string_parser().parse("\"Hello\" \"World\""),
             Ok(crate::Literal::Str("HelloWorld".to_string()))
         );
+    }
+
+    #[test]
+    fn parse_literal() {
+        use crate::Literal;
+        let p = crate::Literal::parser();
+
+        assert_eq!(
+            p.parse("\"String\""),
+            Ok(Literal::Str("String".to_string()))
+        );
+        assert_eq!(p.parse("'c'"), Ok(Literal::Character('c')));
+        assert_eq!(p.parse("2.1"), Ok(Literal::FloatingPoint(2.1)));
+        assert_eq!(p.parse("TRUE"), Ok(Literal::Bool(true)));
+        assert_eq!(p.parse("3"), Ok(Literal::Integer(3)));
     }
 }
