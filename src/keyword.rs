@@ -19,10 +19,15 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *********************************************************************************/
 
+use chumsky::prelude::*;
+
 use std::fmt::Display;
 use strum::EnumIter;
 
-#[derive(Debug, PartialEq, EnumIter)]
+/// The Keyword enum lists all the keywords of the
+/// IDL language and provides means of iterating
+/// and generating parsers for the keywords
+#[derive(Debug, Clone, PartialEq, EnumIter)]
 pub enum Keyword {
     Abstract,
     Any,
@@ -109,6 +114,13 @@ pub enum Keyword {
     UInt64,
 }
 
+impl Keyword {
+    /// Builds a parser for a keyword
+    pub fn make_parser(&self) -> impl Parser<char, Keyword, Error = Simple<char>> {
+        text::keyword(self.to_string()).to(self.clone())
+    }
+}
+
 impl Display for Keyword {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // The intent with this functions is to retrieve the keyword as it
@@ -129,6 +141,7 @@ impl Display for Keyword {
 #[cfg(test)]
 mod keyword_tests {
     use crate::keyword::Keyword;
+    use chumsky::Parser;
     use strum::IntoEnumIterator;
 
     #[test]
@@ -142,5 +155,19 @@ mod keyword_tests {
     fn iter() {
         assert!(Keyword::iter().find(|k| k == &Keyword::Boolean).is_some());
         assert!(Keyword::iter().find(|k| k == &Keyword::Struct).is_some());
+    }
+
+    #[test]
+    fn make_parser() {
+        assert_eq!(
+            Keyword::False.make_parser().parse("FALSE"),
+            Ok(Keyword::False)
+        );
+        assert!(Keyword::False.make_parser().parse("fAlse").is_err());
+        assert_eq!(
+            Keyword::Struct.make_parser().parse("struct"),
+            Ok(Keyword::Struct)
+        );
+        assert!(Keyword::Struct.make_parser().parse("Struct").is_err());
     }
 }
