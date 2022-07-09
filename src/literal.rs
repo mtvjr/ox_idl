@@ -98,9 +98,11 @@ impl Literal {
         // A sequence of digits preceded by 0x (or 0X) is taken to be a hexadecimal
         // integer (base sixteen). The hexadecimal digits include a (or A) through
         // f (or F) with decimal values ten through fifteen, respectively.
-        Self::hex_int_parser()
-            .or(Self::oct_int_parser())
-            .or(Self::dec_int_parser())
+        choice((
+            Self::hex_int_parser(),
+            Self::oct_int_parser(),
+            Self::dec_int_parser(),
+        ))
     }
 
     /// Builds a parser is able to parse any floating point literal
@@ -131,7 +133,7 @@ impl Literal {
                     Self::FloatingPoint((d + "." + f.as_str()).parse().unwrap())
                 });
 
-        decimal_and_fractional.or(decimal_only).or(fractional_only)
+        choice((decimal_and_fractional, decimal_only, fractional_only))
     }
 
     /// Builds a parser is able to parse a fixed point literal
@@ -164,7 +166,7 @@ impl Literal {
                 Self::FixedPoint(d.parse().unwrap(), f.parse().unwrap())
             });
 
-        decimal_and_fractional.or(decimal_only).or(fractional_only)
+        choice((decimal_and_fractional, decimal_only, fractional_only))
     }
 
     /// Builds a parser is able to parse a character literal
@@ -231,12 +233,14 @@ impl Literal {
 
     /// Builds a parser is able to parse any literal
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
-        Self::bool_parser()
-            .or(Self::fixed_parser()) // Fixed needs to be before float
-            .or(Self::float_parser()) // Float needs to be before int
-            .or(Self::int_parser())
-            .or(Self::char_parser())
-            .or(Self::string_parser())
+        choice((
+            Self::bool_parser(),
+            Self::fixed_parser(), // Fixed needs to be before float
+            Self::float_parser(), // Float needs to be before int
+            Self::int_parser(),
+            Self::char_parser(),
+            Self::string_parser(),
+        ))
     }
 }
 
