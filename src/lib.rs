@@ -68,6 +68,30 @@ impl Literal {
             .or(Self::dec_int_parser())
     }
 
+    pub fn float_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
+        // TODO: Support e notation
+        let digits = text::digits(10);
+        let dot_part = just('.').repeated().at_most(1);
+
+        let decimal_only = digits
+            .then_ignore(dot_part)
+            .map(|d| Self::FloatingPoint(d.parse().unwrap()));
+
+        let fractional_only = dot_part
+            .ignore_then(digits)
+            .map(|f| Self::FloatingPoint(('.'.to_string() + f.as_str()).parse().unwrap()));
+
+        let decimal_and_fractional =
+            digits
+                .then_ignore(just('.'))
+                .then(digits)
+                .map(|(d, f): (String, String)| {
+                    Self::FloatingPoint((d + "." + f.as_str()).parse().unwrap())
+                });
+
+        decimal_and_fractional.or(decimal_only).or(fractional_only)
+    }
+
     pub fn char_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // TODO: Support escape sequences
         filter::<_, _, Simple<char>>(|c: &char| c.is_ascii())
@@ -92,6 +116,7 @@ impl Literal {
 
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         Self::bool_parser()
+            .or(Self::float_parser()) // Float needs to be before int
             .or(Self::int_parser())
             .or(Self::char_parser())
             .or(Self::string_parser())
@@ -214,6 +239,31 @@ mod literal_tests {
             crate::Literal::oct_int_parser().parse("0527"),
             Ok(crate::Literal::Integer(343))
         );
+    }
+
+    #[test]
+    fn parse_float() {
+        assert_eq!(
+            crate::Literal::float_parser().parse("1.1"),
+            Ok(crate::Literal::FloatingPoint(1.1))
+        );
+        assert_eq!(
+            crate::Literal::float_parser().parse("19234.12534"),
+            Ok(crate::Literal::FloatingPoint(19234.12534))
+        );
+        assert_eq!(
+            crate::Literal::float_parser().parse("0"),
+            Ok(crate::Literal::FloatingPoint(0.0))
+        );
+        assert_eq!(
+            crate::Literal::float_parser().parse(".0"),
+            Ok(crate::Literal::FloatingPoint(0.0))
+        );
+        assert_eq!(
+            crate::Literal::float_parser().parse("0.0"),
+            Ok(crate::Literal::FloatingPoint(0.0))
+        );
+        assert!(crate::Literal::float_parser().parse(".").is_err());
     }
 
     #[test]
