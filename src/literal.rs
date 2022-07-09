@@ -185,7 +185,7 @@ impl Literal {
         // TODO: Support escape sequences
         filter::<_, _, Simple<char>>(|c: &char| c.is_ascii())
             .delimited_by(just("'"), just("'"))
-            .map(|c: char| Self::Character(c))
+            .map(Self::Character)
     }
 
     /// Builds a parser is able to parse a string literal
