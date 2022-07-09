@@ -230,7 +230,6 @@ impl Literal {
     }
 
     /// Builds a parser is able to parse any literal
-    #[allow(dead_code)]
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         Self::bool_parser()
             .or(Self::fixed_parser()) // Fixed needs to be before float
