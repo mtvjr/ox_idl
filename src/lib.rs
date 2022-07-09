@@ -75,10 +75,26 @@ impl Literal {
             .map(|c: char| Self::Character(c))
     }
 
+    pub fn string_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
+        // TODO: Support escape sequences
+        // FIXME: This should ideally use the Latin-1 character set
+        let single_string = filter::<_, _, Simple<char>>(|c: &char| *c != '"')
+            .repeated()
+            .delimited_by(just('"'), just('"'))
+            .collect::<String>();
+
+        // Now support implicit concatination
+        single_string
+            .then_ignore(text::whitespace())
+            .repeated()
+            .map(|vs| Self::Str(vs.concat()))
+    }
+
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         Self::bool_parser()
             .or(Self::int_parser())
             .or(Self::char_parser())
+            .or(Self::string_parser())
     }
 }
 
@@ -213,6 +229,26 @@ mod literal_tests {
         assert_eq!(
             crate::Literal::char_parser().parse("'a'"),
             Ok(crate::Literal::Character('a'))
+        );
+    }
+
+    #[test]
+    fn parse_string() {
+        // Test normal strings
+        let validate_string = |s: &str| {
+            assert_eq!(
+                crate::Literal::string_parser().parse(("\"".to_string() + s + "\"").as_str()),
+                Ok(crate::Literal::Str(s.to_string()))
+            );
+        };
+        validate_string("Hello World!");
+        validate_string("");
+        validate_string("I ate a beef sandwich");
+
+        // Test implicit concatination
+        assert_eq!(
+            crate::Literal::string_parser().parse("\"Hello\" \"World\""),
+            Ok(crate::Literal::Str("HelloWorld".to_string()))
         );
     }
 }
