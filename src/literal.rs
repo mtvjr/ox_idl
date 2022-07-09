@@ -21,6 +21,8 @@
 
 use chumsky::prelude::*;
 
+use crate::keyword::Keyword;
+
 /// The Literal type represents an IDL literal value
 ///
 /// There is only basic support at the moment, with the wchar
@@ -39,13 +41,13 @@ impl Literal {
     /// Builds a parser is able to parse a true boolean literal
     pub fn true_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.4.1.3 (19) True values are represented as "TRUE"
-        text::keyword("TRUE").map(|_| Literal::Bool(true))
+        Keyword::True.make_parser().to(Literal::Bool(true))
     }
 
     /// Builds a parser is able to parse a false boolean literal
     pub fn false_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.4.1.3 (19) False values are represented as "FALSE"
-        text::keyword("FALSE").map(|_| Literal::Bool(false))
+        Keyword::False.make_parser().to(Literal::Bool(false))
     }
 
     /// Builds a parser is able to parse any boolean literal
