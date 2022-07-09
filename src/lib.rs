@@ -92,6 +92,32 @@ impl Literal {
         decimal_and_fractional.or(decimal_only).or(fractional_only)
     }
 
+    pub fn fixed_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
+        let digits = text::digits(10);
+        let dot = just('.');
+        let the_d = just('d').or(just('D'));
+
+        let decimal_only = digits
+            .then_ignore(dot.repeated().at_most(1))
+            .then_ignore(the_d)
+            .map(|d| Self::FixedPoint(d.parse().unwrap(), 0));
+
+        let fractional_only = dot
+            .ignore_then(digits)
+            .then_ignore(the_d)
+            .map(|f| Self::FixedPoint(0, f.parse().unwrap()));
+
+        let decimal_and_fractional = digits
+            .then_ignore(just('.'))
+            .then(digits)
+            .then_ignore(the_d)
+            .map(|(d, f): (String, String)| {
+                Self::FixedPoint(d.parse().unwrap(), f.parse().unwrap())
+            });
+
+        decimal_and_fractional.or(decimal_only).or(fractional_only)
+    }
+
     pub fn char_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // TODO: Support escape sequences
         filter::<_, _, Simple<char>>(|c: &char| c.is_ascii())
@@ -116,6 +142,7 @@ impl Literal {
 
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         Self::bool_parser()
+            .or(Self::fixed_parser()) // Fixed needs to be before float
             .or(Self::float_parser()) // Float needs to be before int
             .or(Self::int_parser())
             .or(Self::char_parser())
@@ -303,6 +330,26 @@ mod literal_tests {
     }
 
     #[test]
+    fn parse_fixed() {
+        assert_eq!(
+            crate::Literal::fixed_parser().parse("3.6D"),
+            Ok(crate::Literal::FixedPoint(3, 6))
+        );
+        assert_eq!(
+            crate::Literal::fixed_parser().parse("1.2d"),
+            Ok(crate::Literal::FixedPoint(1, 2))
+        );
+        assert_eq!(
+            crate::Literal::fixed_parser().parse(".3d"),
+            Ok(crate::Literal::FixedPoint(0, 3))
+        );
+        assert_eq!(
+            crate::Literal::fixed_parser().parse("3d"),
+            Ok(crate::Literal::FixedPoint(3, 0))
+        );
+    }
+
+    #[test]
     fn parse_literal() {
         use crate::Literal;
         let p = crate::Literal::parser();
@@ -313,6 +360,7 @@ mod literal_tests {
         );
         assert_eq!(p.parse("'c'"), Ok(Literal::Character('c')));
         assert_eq!(p.parse("2.1"), Ok(Literal::FloatingPoint(2.1)));
+        assert_eq!(p.parse("2.1d"), Ok(Literal::FixedPoint(2, 1)));
         assert_eq!(p.parse("TRUE"), Ok(Literal::Bool(true)));
         assert_eq!(p.parse("3"), Ok(Literal::Integer(3)));
     }
