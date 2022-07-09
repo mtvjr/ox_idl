@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 chumsky = "0.8.0"
 clap = "3.2.8"
+strum = { version = "0.24.1", features = ["derive"] }
