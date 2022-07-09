@@ -115,7 +115,20 @@ pub enum Keyword {
 }
 
 impl Keyword {
-    /// Builds a parser for a keyword
+    /// Builds a parser for a keyword that accepts the IDL defined keyword
+    /// and returns the value of the keyword
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use ridl::keyword::Keyword;
+    /// use chumsky::prelude::*;
+    ///
+    /// let false_parser = Keyword::False.make_parser();
+    ///
+    /// let result = false_parser.parse("FALSE");
+    /// assert_eq!(result, Ok(Keyword::False));
+    /// ```
     pub fn make_parser(&self) -> impl Parser<char, Keyword, Error = Simple<char>> {
         text::keyword(self.to_string()).to(self.clone())
     }
