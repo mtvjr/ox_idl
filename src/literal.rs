@@ -29,34 +29,92 @@ use crate::keyword::Keyword;
 /// and wstring types not being yet supported.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
+    /// A Bool represents a boolean literal
     Bool(bool),
+    /// A Bool represents a character or wide character literal
     Character(char),
+    /// A FixedPoint represents a fixed point literal
     FixedPoint(u64, u64),
+    /// A FloatingPoint represents a floating point (single or double precision) literal
     FloatingPoint(f64),
+    /// An Integer represents a integer literal
     Integer(u64),
+    /// A Str represents a string or wstring literal
     Str(String),
 }
 
 impl Literal {
-    /// Builds a parser is able to parse a true boolean literal
+    /// Builds a parser is able to parse a true boolean literal as specified in
+    /// the IDL Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::bool_parser();
+    ///
+    /// let t = parser.parse("TRUE");
+    /// assert_eq!(t, Ok(Literal::Bool(true)));
+    /// ```
     pub fn true_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.4.1.3 (19) True values are represented as "TRUE"
         Keyword::True.make_parser().to(Literal::Bool(true))
     }
 
-    /// Builds a parser is able to parse a false boolean literal
+    /// Builds a parser is able to parse a false boolean literal as specified in
+    /// the IDL Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::bool_parser();
+    ///
+    /// let t = parser.parse("FALSE");
+    /// assert_eq!(t, Ok(Literal::Bool(false)));
+    /// ```
     pub fn false_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.4.1.3 (19) False values are represented as "FALSE"
         Keyword::False.make_parser().to(Literal::Bool(false))
     }
 
-    /// Builds a parser is able to parse any boolean literal
+    /// Builds a parser is able to parse a boolean literal as specified in
+    /// the IDL Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::bool_parser();
+    ///
+    /// let t = parser.parse("TRUE");
+    /// assert_eq!(t, Ok(Literal::Bool(true)));
+    /// ```
     pub fn bool_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.4.1.3 (19) <boolean_literal> ::= "TRUE" | "FALSE"
         Self::true_parser().or(Self::false_parser())
     }
 
-    /// Builds a parser is able to parse a decimal integer literal
+    /// Builds a parser is able to parse a decimal (base 10) integer literal
+    /// as specified in the IDL Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::dec_int_parser();
+    ///
+    /// let d = parser.parse("325");
+    /// assert_eq!(d, Ok(Literal::Integer(325)));
+    /// ```
     pub fn dec_int_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.1
         // An integer literal consisting of a sequence of digits is taken to be decimal
@@ -64,7 +122,20 @@ impl Literal {
         text::int(10).map(|d: String| Literal::Integer(d.parse().unwrap()))
     }
 
-    /// Builds a parser is able to parse a hex integer literal
+    /// Builds a parser is able to parse a hexidecimal integer literal as specified
+    /// in the IDL Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::hex_int_parser();
+    ///
+    /// let h = parser.parse("0xFADE");
+    /// assert_eq!(h, Ok(Literal::Integer(64222)));
+    /// ```
     pub fn hex_int_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.1
         // A sequence of digits preceded by 0x (or 0X) is taken to be a hexadecimal
@@ -76,7 +147,20 @@ impl Literal {
             .map(|d: String| Literal::Integer(u64::from_str_radix(d.as_str(), 16).unwrap()))
     }
 
-    /// Builds a parser is able to parse a octal integer literal
+    /// Builds a parser is able to parse an octal integer literal as specified in the IDL
+    /// Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::oct_int_parser();
+    ///
+    /// let o = parser.parse("0325");
+    /// assert_eq!(o, Ok(Literal::Integer(213)));
+    /// ```
     pub fn oct_int_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.1
         // A sequence of digits starting with 0 is taken to be an octal integer (base eight).
@@ -87,7 +171,24 @@ impl Literal {
         })
     }
 
-    /// Builds a parser is able to parse any integer literal
+    /// Builds a parser is able to parse any integer literal as specified in the IDL
+    /// Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::int_parser();
+    ///
+    /// let d = parser.parse("325");
+    /// assert_eq!(d, Ok(Literal::Integer(325)));
+    /// let o = parser.parse("0325");
+    /// assert_eq!(o, Ok(Literal::Integer(213)));
+    /// let h = parser.parse("0xFADE");
+    /// assert_eq!(h, Ok(Literal::Integer(64222)));
+    /// ```
     pub fn int_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.1
         // An integer literal consisting of a sequence of digits is taken to be decimal
@@ -107,7 +208,20 @@ impl Literal {
         ))
     }
 
-    /// Builds a parser is able to parse any floating point literal
+    /// Builds a parser is able to parse a floating point literal as specified in the IDL
+    /// Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::float_parser();
+    ///
+    /// let f = parser.parse("1.3");
+    /// assert_eq!(f, Ok(Literal::FloatingPoint(1.3)));
+    /// ```
     pub fn float_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.4
         // A floating-point literal consists of an integer part, a decimal point
@@ -138,7 +252,20 @@ impl Literal {
         choice((decimal_and_fractional, decimal_only, fractional_only))
     }
 
-    /// Builds a parser is able to parse a fixed point literal
+    /// Builds a parser is able to parse a fixed point literal as specified in the IDL
+    /// Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::fixed_parser();
+    ///
+    /// let f = parser.parse("1.3d");
+    /// assert_eq!(f, Ok(Literal::FixedPoint(1, 3)));
+    /// ```
     pub fn fixed_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.5
         // A fixed-point decimal literal consists of an integer part, a decimal
@@ -171,7 +298,22 @@ impl Literal {
         choice((decimal_and_fractional, decimal_only, fractional_only))
     }
 
-    /// Builds a parser is able to parse a character literal
+    /// Builds a parser is able to parse a character literal as specified in the IDL
+    /// Documentation
+    ///
+    /// FIXME: This function does not yet support escape sequences
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::char_parser();
+    ///
+    /// let c = parser.parse("'c'");
+    /// assert_eq!(c, Ok(Literal::Character('c')));
+    /// ```
     pub fn char_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.2
         // A char is an 8-bit quantity with a numerical value between 0 and 255 (decimal).
@@ -192,7 +334,20 @@ impl Literal {
             .map(Self::Character)
     }
 
-    /// Builds a parser is able to parse a string literal
+    /// Builds a parser is able to parse a string literal as specified in the IDL
+    /// Documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::string_parser();
+    ///
+    /// let s = parser.parse("\"Hello\"  \"World\"");
+    /// assert_eq!(s, Ok(Literal::Str("HelloWorld".to_string())));
+    /// ```
     pub fn string_parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         // 7.2.6.3
         // Strings are null-terminated sequences of characters. Strings are of
@@ -233,7 +388,23 @@ impl Literal {
             .map(|vs| Self::Str(vs.concat()))
     }
 
-    /// Builds a parser is able to parse any literal
+    /// Builds a parser is able to parse any literal as specified in the IDL
+    /// documentation
+    ///
+    /// Example
+    ///
+    /// ```
+    /// use ridl::literal::Literal;
+    /// use chumsky::prelude::*;
+    ///
+    /// let parser = Literal::parser();
+    ///
+    /// let i = parser.parse("2340");
+    /// assert_eq!(i, Ok(Literal::Integer(2340)));
+    ///
+    /// let s = parser.parse("\"Hello\"  \"World\"");
+    /// assert_eq!(s, Ok(Literal::Str("HelloWorld".to_string())));
+    /// ```
     pub fn parser() -> impl Parser<char, Literal, Error = Simple<char>> {
         choice((
             Self::bool_parser(),
