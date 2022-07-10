@@ -50,7 +50,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::bool_parser();
@@ -69,7 +69,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::bool_parser();
@@ -88,7 +88,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::bool_parser();
@@ -107,7 +107,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::dec_int_parser();
@@ -128,7 +128,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::hex_int_parser();
@@ -153,7 +153,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::oct_int_parser();
@@ -177,7 +177,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::int_parser();
@@ -214,7 +214,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::float_parser();
@@ -258,7 +258,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::fixed_parser();
@@ -306,7 +306,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::char_parser();
@@ -340,7 +340,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::string_parser();
@@ -394,7 +394,7 @@ impl Literal {
     /// Example
     ///
     /// ```
-    /// use ridl::literal::Literal;
+    /// use ox_idl::literal::Literal;
     /// use chumsky::prelude::*;
     ///
     /// let parser = Literal::parser();

@@ -121,7 +121,7 @@ impl Keyword {
     /// Example:
     ///
     /// ```
-    /// use ridl::keyword::Keyword;
+    /// use ox_idl::keyword::Keyword;
     /// use chumsky::prelude::*;
     ///
     /// let false_parser = Keyword::False.make_parser();
